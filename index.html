@@ -27,28 +27,34 @@ input,select,textarea{font-family:inherit;outline:none}
 ::-webkit-scrollbar-track{background:transparent}
 
 .header{background:var(--bg2);padding:20px 24px 16px;box-shadow:var(--shadow)}
-.header-inner{max-width:960px;margin:0 auto}
+.header-inner{max-width:1400px;margin:0 auto;padding:0 32px}
 .header-sub{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:4px;font-family:'JetBrains Mono',monospace}
 .header-title{font-size:22px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
 .header-date{font-size:11px;color:var(--text3);margin-top:3px}
 
-.nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;max-width:960px;margin:0 auto}
+.nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;max-width:1400px;margin:0 auto;padding:0 32px}
 .nav-btn{flex:1;padding:12px 2px 10px;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);border-bottom:2px solid transparent;font-weight:500;transition:all .15s;font-size:10px}
 .nav-btn:hover{color:var(--text2)}
 .nav-btn.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
 .nav-btn svg{width:18px;height:18px}
 
-.filter-bar{display:flex;gap:6px;padding:12px 16px;max-width:960px;margin:0 auto;overflow-x:auto}
+.filter-bar{display:flex;gap:6px;padding:12px 32px;max-width:1400px;margin:0 auto;overflow-x:auto}
 .chip{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;background:var(--bg4);color:var(--text3);white-space:nowrap;transition:all .15s;cursor:pointer}
 .chip:hover{opacity:.85}
 .chip.active{background:var(--blue);color:#fff}
 
-.content{max-width:960px;margin:0 auto;padding:4px 16px 88px}
+.content{max-width:1400px;margin:0 auto;padding:4px 32px 88px}
 
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.stat{background:var(--bg2);border-radius:12px;padding:16px 10px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
-.stat-num{font-size:28px;font-weight:800;font-family:'JetBrains Mono',monospace}
-.stat-label{font-size:10px;color:var(--text3);margin-top:4px;font-weight:600}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:10px}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:8px}
+.item-grid .item-card,.item-grid .ms-card{margin-bottom:0}
+.card-grid .proj-card{margin-bottom:0}
+@media(max-width:520px){.card-grid,.item-grid{grid-template-columns:1fr}}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--bg2);border-radius:12px;padding:20px 12px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
+.stat-num{font-size:32px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat-label{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600}
 
 .alert{background:var(--bg2);border-radius:12px;padding:14px;margin-bottom:10px;border-left:3px solid var(--red);box-shadow:var(--shadow)}
 .alert-title{font-size:12px;font-weight:700;margin-bottom:6px}
@@ -255,7 +261,7 @@ function dashboardHTML(){
   if(blocked.length)h+=`<div class="alert"><div class="alert-title" style="color:#DC2626">⚠ 阻塞 (${blocked.length})</div>${blocked.map(t=>`<div class="alert-row"><span>${pIcon(t.project)}</span><span style="flex:1">${t.title}</span></div>`).join("")}</div>`;
   if(p0.length)h+=`<div class="alert" style="border-left-color:#D97706"><div class="alert-title" style="color:#D97706">🔥 P0 紧急 (${p0.length})</div>${p0.map(t=>`<div class="alert-row"><span>${pIcon(t.project)}</span><span style="flex:1">${t.title}</span>${badgeHTML(t.status)}</div>`).join("")}</div>`;
 
-  h+=`<div style="font-size:13px;font-weight:700;color:var(--text2);margin:16px 0 10px">项目概览</div>`;
+  h+=`<div style="font-size:13px;font-weight:700;color:var(--text2);margin:16px 0 10px">项目概览</div><div class="card-grid">`;
   PROJECTS.forEach(p=>{
     const pt=D.tasks.filter(t=>t.project===p.id);
     const pm=D.milestones.filter(m=>m.project===p.id);
@@ -271,6 +277,7 @@ function dashboardHTML(){
       ${pm.length?`<div style="margin-top:8px">${pm.map(m=>`<div style="font-size:10px;color:var(--text3);display:flex;gap:6px;align-items:center;margin-top:3px"><span style="color:${m.status==="done"?"#16A34A":"var(--text3)"}">${m.status==="done"?"✓":"◇"}</span><span style="flex:1">${m.title}</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px">${m.target}</span></div>`).join("")}</div>`:""}
     </div>`;
   });
+  h+=`</div>`;
   return h;
 }
 
@@ -280,6 +287,7 @@ function itemListHTML(cat){
   const sorted=[...items].sort((a,b)=>{const so={blocked:0,doing:1,todo:2,done:3};const po={P0:0,P1:1,P2:2,P3:3};return(so[a.status]-so[b.status])||(po[a.priority]-po[b.priority]);});
   let h=`<div class="section-title"><i data-lucide="${cat==="task"?"list-checks":"alert-triangle"}"></i> ${cat==="task"?"任务":"问题"} (${items.length})</div>`;
   if(!sorted.length)return h+`<div class="empty">暂无${cat==="task"?"任务":"问题"}，点 + 添加</div>`;
+  h+=`<div class="item-grid">`;
   sorted.forEach(t=>{
     const pr=pFind(t.project);
     const ex=expanded===t.id;
@@ -301,6 +309,7 @@ function itemListHTML(cat){
       </div>`:""}
     </div>`;
   });
+  h+=`</div>`;
   return h;
 }
 
@@ -328,6 +337,7 @@ function milestoneHTML(){
   </div>`;
 
   if(!ms.length)return h+`<div class="empty">暂无里程碑</div>`;
+  h+=`<div class="item-grid">`;
   ms.sort((a,b)=>a.target.localeCompare(b.target)).forEach(m=>{
     const pr=pFind(m.project);
     const over=m.status!=="done"&&m.target<today;
@@ -347,6 +357,7 @@ function milestoneHTML(){
       </div>
     </div>`;
   });
+  h+=`</div>`;
   return h;
 }
 
