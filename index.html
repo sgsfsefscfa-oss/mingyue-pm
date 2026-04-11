@@ -10,8 +10,10 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="//at.alicdn.com/t/c/font_5158555_2x1napi5x23.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+.ifc{width:1em;height:1em;vertical-align:-0.15em;fill:currentColor;overflow:hidden}
 :root{
   --bg:#F7F8FA;--bg2:#FFFFFF;--bg3:#F0F2F5;--bg4:#E8ECF0;
   --border:#E2E6EA;--text:#1A1D21;--text2:#5F6B7A;--text3:#8B95A3;
@@ -36,7 +38,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .nav-btn{flex:1;padding:12px 2px 10px;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);border-bottom:2px solid transparent;font-weight:500;transition:all .15s;font-size:10px}
 .nav-btn:hover{color:var(--text2)}
 .nav-btn.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
-.nav-btn svg{width:18px;height:18px}
+.nav-btn svg{width:22px;height:22px}
 
 .filter-bar{display:flex;gap:6px;padding:12px 32px;max-width:100%;margin:0 auto;overflow-x:auto}
 .chip{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;background:var(--bg4);color:var(--text3);white-space:nowrap;transition:all .15s;cursor:pointer}
@@ -209,15 +211,17 @@ function render(){
   lucide.createIcons();
 }
 
+function ifc(name,size){return `<svg class="ifc" style="width:${size||22}px;height:${size||22}px" aria-hidden="true"><use xlink:href="#icon-${name}"></use></svg>`;}
+
 function renderNav(){
   const items=[
-    {k:"dashboard",i:"layout-dashboard",l:"总览"},
-    {k:"tasks",i:"list-checks",l:"任务"},
-    {k:"issues",i:"alert-triangle",l:"问题"},
-    {k:"milestones",i:"flag",l:"里程碑"},
-    {k:"report",i:"file-bar-chart",l:"报告"}
+    {k:"dashboard",i:"yueliang",l:"总览"},
+    {k:"tasks",i:"wandou",l:"任务"},
+    {k:"issues",i:"huluobu",l:"问题"},
+    {k:"milestones",i:"caihong",l:"里程碑"},
+    {k:"report",i:"nailao",l:"报告"}
   ];
-  document.getElementById("nav").innerHTML=items.map(n=>`<button class="nav-btn ${view===n.k?"active":""}" onclick="view='${n.k}';expanded=null;render()"><i data-lucide="${n.i}"></i><span>${n.l}</span></button>`).join("");
+  document.getElementById("nav").innerHTML=items.map(n=>`<button class="nav-btn ${view===n.k?"active":""}" onclick="view='${n.k}';expanded=null;render()">${ifc(n.i,22)}<span>${n.l}</span></button>`).join("");
 }
 
 function renderFilters(){
@@ -285,7 +289,7 @@ function dashboardHTML(){
 function itemListHTML(cat){
   const items=ft().filter(t=>t.cat===cat);
   const sorted=[...items].sort((a,b)=>{const so={blocked:0,doing:1,todo:2,done:3};const po={P0:0,P1:1,P2:2,P3:3};return(so[a.status]-so[b.status])||(po[a.priority]-po[b.priority]);});
-  let h=`<div class="section-title"><i data-lucide="${cat==="task"?"list-checks":"alert-triangle"}"></i> ${cat==="task"?"任务":"问题"} (${items.length})</div>`;
+  let h=`<div class="section-title">${ifc(cat==="task"?"wandou":"huluobu",18)} ${cat==="task"?"任务":"问题"} (${items.length})</div>`;
   if(!sorted.length)return h+`<div class="empty">暂无${cat==="task"?"任务":"问题"}，点 + 添加</div>`;
   h+=`<div class="item-grid">`;
   sorted.forEach(t=>{
@@ -323,7 +327,7 @@ function milestoneHTML(){
   const ms=proj==="all"?D.milestones:D.milestones.filter(m=>m.project===proj);
   const today=new Date().toISOString().split("T")[0];
   let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <div class="section-title" style="margin:0"><i data-lucide="flag"></i> 里程碑 (${ms.length})</div>
+    <div class="section-title" style="margin:0">${ifc("caihong",18)} 里程碑 (${ms.length})</div>
     <button class="act-btn" style="color:var(--blue)" onclick="msAdding=!msAdding;renderContent();lucide.createIcons()">${msAdding?"取消":"+ 添加"}</button>
   </div>`;
 
@@ -507,12 +511,10 @@ async function gistPush(){
 function renderSyncBtn(){
   const el=document.getElementById("sync-btn");
   if(!el)return;
-  const icons={idle:"cloud",syncing:"refresh-cw",ok:"cloud",error:"alert-circle"};
-  const colors={idle:"var(--text3)",syncing:"var(--blue)",ok:"var(--green)",error:"var(--red)"};
-  el.innerHTML=`<i data-lucide="${icons[sSt]}" style="width:20px;height:20px"></i>`;
-  el.style.color=sCfg.token?colors[sSt]:"var(--text3)";
+  const icons={idle:"qingzhuanduoyun",syncing:"weifeng",ok:"qingzhuanduoyun",error:"shengnvguo"};
+  el.innerHTML=ifc(icons[sSt],22);
+  el.style.opacity=sCfg.token?(sSt==="error"?"1":"1"):"0.5";
   el.title=sCfg.lastSync?"最后同步："+new Date(sCfg.lastSync).toLocaleString("zh-CN"):"未配置同步";
-  lucide.createIcons();
 }
 
 function openSyncModal(){
