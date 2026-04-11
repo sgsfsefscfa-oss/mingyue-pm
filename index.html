@@ -157,10 +157,10 @@ td{padding:8px 10px;color:var(--text2);border-bottom:1px solid var(--border)}
 <script>
 // ========== DATA ==========
 const PROJECTS=[
-  {id:"agent",name:"AI Agent 打造",color:"#C2410C",icon:"🤖",desc:"场景调研→方案设计→数据协调→开发对接→交付"},
-  {id:"hangqing",name:"行情高手",color:"#2563EB",icon:"📊",desc:"B端产品全权负责，看板+分析框架"},
-  {id:"tmall",name:"天猫合作 Agent",color:"#D97706",icon:"🛒",desc:"MCP授权对接，维护合作关系"},
-  {id:"other",name:"其他事务",color:"#6B7280",icon:"📌",desc:"零散任务与临时事项"},
+  {id:"agent",name:"AI Agent 打造",color:"#C2410C",ic:"caomeixiong",short:"Agent",desc:"场景调研→方案设计→数据协调→开发对接→交付"},
+  {id:"hangqing",name:"行情高手",color:"#2563EB",ic:"niuyouguo",short:"行情",desc:"B端产品全权负责，看板+分析框架"},
+  {id:"tmall",name:"天猫合作 Agent",color:"#D97706",ic:"nangua",short:"天猫",desc:"MCP授权对接，维护合作关系"},
+  {id:"other",name:"其他事务",color:"#6B7280",ic:"huacai",short:"其他",desc:"零散任务与临时事项"},
 ];
 const ST={todo:{l:"待办",c:"#64748B",bg:"#F1F5F9"},doing:{l:"进行中",c:"#2563EB",bg:"#EFF6FF"},done:{l:"已完成",c:"#16A34A",bg:"#F0FDF4"},blocked:{l:"阻塞",c:"#DC2626",bg:"#FEF2F2"}};
 const PR={P0:{l:"P0",c:"#DC2626",bg:"#FEF2F2"},P1:{l:"P1",c:"#D97706",bg:"#FFFBEB"},P2:{l:"P2",c:"#2563EB",bg:"#EFF6FF"},P3:{l:"P3",c:"#6B7280",bg:"#F9FAFB"}};
@@ -224,7 +224,7 @@ function renderNav(){
 
 function renderFilters(){
   const all=`<button class="chip ${proj==="all"?"active":""}" onclick="proj='all';render()">全部</button>`;
-  const ps=PROJECTS.map(p=>`<button class="chip" style="background:${proj===p.id?p.color:"var(--bg4)"};color:${proj===p.id?"#fff":"var(--text3)"}" onclick="proj='${p.id}';render()">${p.icon}</button>`).join("");
+  const ps=PROJECTS.map(p=>`<button class="chip" style="background:${proj===p.id?p.color:"var(--bg4)"};color:${proj===p.id?"#fff":"var(--text3)"};display:inline-flex;align-items:center;gap:4px" onclick="proj='${p.id}';render()">${ifc(p.ic,16)} ${p.short}</button>`).join("");
   document.getElementById("filters").innerHTML=all+ps;
 }
 
@@ -272,7 +272,7 @@ function dashboardHTML(){
     const pct=pt.length?Math.round(dn/pt.length*100):0;
     h+=`<div class="proj-card" style="border-left-color:${p.color}">
       <div class="proj-header">
-        <div><div class="proj-name">${p.icon} ${p.name}</div><div class="proj-desc">${p.desc}</div></div>
+        <div><div class="proj-name" style="display:flex;align-items:center;gap:6px">${ifc(p.ic,20)} ${p.name}</div><div class="proj-desc">${p.desc}</div></div>
         <div style="text-align:right"><div class="proj-pct" style="color:${p.color}">${pct}%</div><div style="font-size:9px;color:var(--text3)">${dn}/${pt.length}</div></div>
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${p.color}"></div></div>
@@ -332,7 +332,7 @@ function milestoneHTML(){
   if(msAdding)h+=`<div class="add-form">
     <input class="inp" id="ms-title" placeholder="里程碑名称">
     <div class="form-row">
-      <select class="inp" id="ms-proj">${PROJECTS.map(p=>`<option value="${p.id}">${p.icon} ${p.name}</option>`).join("")}</select>
+      <select class="inp" id="ms-proj">${PROJECTS.map(p=>`<option value="${p.id}">${p.short} · ${p.name}</option>`).join("")}</select>
       <input type="date" class="inp" id="ms-date">
     </div>
     <button class="pri-btn" style="width:100%;margin-top:8px" onclick="addMilestone()">添加</button>
@@ -392,7 +392,7 @@ function reportHTML(){
   if(rFmt==="table"){
     h+=`<div style="overflow-x:auto;border-radius:10px"><table>
       <thead><tr>${["项目","事项","状态","P"].map(x=>`<th>${x}</th>`).join("")}</tr></thead>
-      <tbody>${tasks.map(t=>{const pr=pFind(t.project);return`<tr><td>${pr?.icon||""}</td><td style="color:var(--text);font-weight:500">${t.title}</td><td>${badgeHTML(t.status)}</td><td><span class="badge" style="background:${PR[t.priority]?.bg};color:${PR[t.priority]?.c};font-size:9px">${t.priority}</span></td></tr>`;}).join("")}</tbody>
+      <tbody>${tasks.map(t=>{const pr=pFind(t.project);return`<tr><td>${pr?ifc(pr.ic,14):""}</td><td style="color:var(--text);font-weight:500">${t.title}</td><td>${badgeHTML(t.status)}</td><td><span class="badge" style="background:${PR[t.priority]?.bg};color:${PR[t.priority]?.c};font-size:9px">${t.priority}</span></td></tr>`;}).join("")}</tbody>
     </table></div>`;
   } else {
     h+=`<div class="report-card">
@@ -403,7 +403,7 @@ function reportHTML(){
   return h;
 }
 function rSection(t,items,c){
-  return `<div class="report-section"><div class="report-section-title" style="${c?`color:${c}`:""}">${t}（${items.length}项）</div>${items.length?items.map(t=>{const pr=pFind(t.project);return`<div class="report-item">${pr?.icon||""} ${t.title}${t.notes?" — "+t.notes:""}</div>`;}).join(""):`<div class="report-item" style="color:var(--text3)">暂无</div>`}</div>`;
+  return `<div class="report-section"><div class="report-section-title" style="${c?`color:${c}`:""}">${t}（${items.length}项）</div>${items.length?items.map(t=>{const pr=pFind(t.project);return`<div class="report-item">${pr?ifc(pr.ic,14):""} ${t.title}${t.notes?" — "+t.notes:""}</div>`;}).join(""):`<div class="report-item" style="color:var(--text3)">暂无</div>`}</div>`;
 }
 
 // ========== MODAL ==========
@@ -413,7 +413,7 @@ function openModal(type,cat){
       <div class="modal-title">添加${cat==="task"?"任务":"问题"}</div>
       <input class="inp" id="m-title" placeholder="标题">
       <div class="form-row">
-        <select class="inp" id="m-proj">${PROJECTS.map(p=>`<option value="${p.id}">${p.icon} ${p.name}</option>`).join("")}</select>
+        <select class="inp" id="m-proj">${PROJECTS.map(p=>`<option value="${p.id}">${p.short} · ${p.name}</option>`).join("")}</select>
         <select class="inp" id="m-pri">${Object.entries(PR).map(([k,v])=>`<option value="${k}"${k==="P1"?" selected":""}>${v.l}</option>`).join("")}</select>
       </div>
       <div class="form-row">
@@ -436,7 +436,7 @@ function openEditModal(id){
       <div class="modal-title">编辑${t.cat==="task"?"任务":"问题"}</div>
       <input class="inp" id="m-title" value="${esc(t.title)}">
       <div class="form-row">
-        <select class="inp" id="m-proj">${PROJECTS.map(p=>`<option value="${p.id}"${p.id===t.project?" selected":""}>${p.icon} ${p.name}</option>`).join("")}</select>
+        <select class="inp" id="m-proj">${PROJECTS.map(p=>`<option value="${p.id}"${p.id===t.project?" selected":""}>${p.short} · ${p.name}</option>`).join("")}</select>
         <select class="inp" id="m-pri">${Object.entries(PR).map(([k,v])=>`<option value="${k}"${k===t.priority?" selected":""}>${v.l}</option>`).join("")}</select>
       </div>
       <div class="form-row">
@@ -468,9 +468,9 @@ function closeModal(){document.getElementById("modal-slot").innerHTML="";}
 
 // ========== HELPERS ==========
 function pFind(id){return PROJECTS.find(p=>p.id===id)}
-function pIcon(id){return pFind(id)?.icon||""}
+function pIcon(id){const p=pFind(id);return p?ifc(p.ic,14):"";}
 function badgeHTML(s){const x=ST[s];return`<span class="badge" style="background:${x.bg};color:${x.c}">${x.l}</span>`;}
-function projBadge(p){return p?`<span class="badge" style="background:${p.color}20;color:${p.color}">${p.icon}</span>`:"";}
+function projBadge(p){return p?`<span class="badge" style="background:${p.color}20;color:${p.color};display:inline-flex;align-items:center;gap:2px">${ifc(p.ic,13)} ${p.short}</span>`:"";}
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 
 // ========== SYNC ==========
