@@ -52,6 +52,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .card-grid .proj-card{margin-bottom:0}
 @media(max-width:520px){.card-grid,.item-grid{grid-template-columns:1fr}}
 @media(max-width:768px){.bug-stats-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.chart-two-col{grid-template-columns:1fr !important}}
 
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .stat{background:var(--bg2);border-radius:12px;padding:20px 12px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
@@ -136,9 +137,13 @@ textarea.inp{resize:vertical;min-height:56px}
 .chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:6px}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .bar-label{font-size:11px;font-weight:600;color:var(--text2);width:100px;text-align:right;flex-shrink:0}
-.bar-track{flex:1;height:24px;background:var(--bg3);border-radius:6px;overflow:hidden;position:relative}
+.bar-track{flex:1;height:28px;background:var(--bg3);border-radius:6px;overflow:hidden;position:relative}
 .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:8px;transition:width .5s;min-width:28px}
 .bar-val{font-size:10px;font-weight:700;color:#fff;font-family:'JetBrains Mono',monospace}
+.stacked-bar{display:flex;height:100%;border-radius:6px;overflow:hidden;transition:width .5s}
+.stacked-seg{height:100%;display:flex;align-items:center;justify-content:center;transition:width .3s}
+.stacked-seg span{font-size:9px;font-weight:700;color:#fff;font-family:'JetBrains Mono',monospace}
+.bar-count{position:absolute;right:-32px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--text2);font-family:'JetBrains Mono',monospace}
 
 .bug-detail-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);border-left:3px solid var(--border);cursor:pointer;transition:all .15s}
 .bug-detail-card:hover{box-shadow:var(--shadow-lg)}
@@ -535,41 +540,85 @@ function bugWeeklyHTML(){
     <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6B7280"></div><div class="bug-stat-num" style="color:#6B7280">${(statusCount["非bug，不予解决"]||0)+(statusCount["转为需求"]||0)}</div><div class="bug-stat-label">已关闭/转需求</div></div>
   </div>`;
 
-  // Two-column charts
-  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">`;
+  // Status order for stacked bars
+  const stackOrder=["bug已受理，修复中","待确认","问题已修复，待验证","非bug，不予解决","转为需求"];
+  const stackColors={"bug已受理，修复中":"#D97706","待确认":"#6366F1","问题已修复，待验证":"#2563EB","非bug，不予解决":"#6B7280","转为需求":"#8B5CF6"};
 
-  // Status distribution donut
-  h+=`<div class="chart-section">
+  // Build per-owner status breakdown
+  const ownerStatusMap={};
+  bugs.forEach(b=>{
+    if(!ownerStatusMap[b.owner])ownerStatusMap[b.owner]={};
+    ownerStatusMap[b.owner][b.status]=(ownerStatusMap[b.owner][b.status]||0)+1;
+  });
+
+  // Build per-cause status breakdown
+  const causeStatusMap={};
+  bugs.forEach(b=>{
+    let cat="其他";
+    const c=b.cause.toLowerCase();
+    if(c.includes("供应商")||c.includes("历史数据")||c.includes("老供应商"))cat="历史数据/供应商问题";
+    else if(c.includes("sql")||c.includes("逻辑")||c.includes("bug")||c.includes("解析"))cat="代码/SQL逻辑缺陷";
+    else if(c.includes("任务丢失")||c.includes("监控")||c.includes("更新"))cat="任务调度/监控缺失";
+    else if(c.includes("设计")||c.includes("口径")||c.includes("结构"))cat="产品设计/口径问题";
+    else if(c.includes("三方")||c.includes("数据源"))cat="三方数据变更";
+    if(!causeStatusMap[cat])causeStatusMap[cat]={};
+    causeStatusMap[cat][b.status]=(causeStatusMap[cat][b.status]||0)+1;
+  });
+
+  // Status distribution donut — full width
+  h+=`<div class="chart-section" style="margin-bottom:12px">
     <div class="chart-title">📋 BUG状态分布</div>
-    <div class="donut-wrap">
-      <svg width="140" height="140" viewBox="0 0 140 140">${makeDonut(statusEntries.map((e,i)=>({val:e[1],color:statusColors[i%statusColors.length]})),70,50,18)}</svg>
-      <div class="donut-legend">${statusEntries.map((e,i)=>{
+    <div class="donut-wrap" style="gap:40px;padding:16px 0">
+      <svg width="220" height="220" viewBox="0 0 220 220">${makeDonut(statusEntries.map((e,i)=>({val:e[1],color:statusColors[i%statusColors.length]})),110,110,70)}</svg>
+      <div class="donut-legend" style="gap:10px">${statusEntries.map((e,i)=>{
         const st=BUG_ST[e[0]];
-        return`<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${statusColors[i%statusColors.length]}"></div><span>${st?st.l:e[0]}</span><span class="donut-legend-val">${e[1]}</span></div>`;
+        const pct=Math.round(e[1]/total*100);
+        return`<div class="donut-legend-item" style="font-size:13px"><div class="donut-legend-dot" style="background:${statusColors[i%statusColors.length]};width:14px;height:14px;border-radius:4px"></div><span style="min-width:60px">${st?st.l:e[0]}</span><span class="donut-legend-val" style="font-size:14px">${e[1]}</span><span style="font-size:11px;color:var(--text3);min-width:40px;text-align:right">${pct}%</span></div>`;
       }).join("")}</div>
     </div>
   </div>`;
 
-  // Owner distribution bar chart
+  // Stacked bar legend
+  const stackLegendHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">${stackOrder.map(s=>{
+    const st=BUG_ST[s];
+    return`<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3)"><div style="width:10px;height:10px;border-radius:2px;background:${stackColors[s]}"></div>${st?st.l:s}</div>`;
+  }).join("")}</div>`;
+
+  // Helper: build stacked bar HTML for a status map
+  function stackedBarRow(label, count, statusMap, maxVal, labelWidth){
+    const barPct=Math.round(count/maxVal*100);
+    const segs=stackOrder.filter(s=>statusMap[s]).map(s=>{
+      const segPct=(statusMap[s]/count*100).toFixed(1);
+      const st=BUG_ST[s];
+      return`<div class="stacked-seg" style="width:${segPct}%;background:${stackColors[s]};min-width:20px" title="${st?st.l:s}: ${statusMap[s]}"><span>${statusMap[s]}</span></div>`;
+    }).join('');
+    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);width:${labelWidth||100}px;text-align:right;flex-shrink:0">${label}</div>
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <div style="flex:0 0 ${barPct}%;min-width:40px;height:28px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg3)">${segs}</div>
+        <span style="font-size:12px;font-weight:800;color:var(--text);font-family:'JetBrains Mono',monospace;flex-shrink:0">${count}</span>
+      </div>
+    </div>`;
+  }
+
+  // Two-column: Owner + Cause
+  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">`;
+
+  // Owner distribution — stacked bar chart
   h+=`<div class="chart-section">
     <div class="chart-title">👤 责任人分布</div>
-    ${ownerEntries.map((e,i)=>{
-      const pct=Math.round(e[1]/maxOwner*100);
-      return`<div class="bar-row"><div class="bar-label">${e[0]}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${ownerColors[i%ownerColors.length]}"><span class="bar-val">${e[1]}</span></div></div></div>`;
-    }).join("")}
+    ${stackLegendHTML}
+    ${ownerEntries.map(e=>stackedBarRow(e[0],e[1],ownerStatusMap[e[0]]||{},maxOwner,80)).join("")}
+  </div>`;
+
+  // Cause category — stacked bar chart
+  h+=`<div class="chart-section">
+    <div class="chart-title">🔍 问题原因分类</div>
+    ${stackLegendHTML}
+    ${causeEntries.map(e=>stackedBarRow(e[0],e[1],causeStatusMap[e[0]]||{},maxCause,150)).join("")}
   </div>`;
 
   h+=`</div>`;
-
-  // Cause category chart
-  h+=`<div class="chart-section">
-    <div class="chart-title">🔍 问题原因分类</div>
-    ${causeEntries.map((e,i)=>{
-      const colors=["#DC2626","#D97706","#2563EB","#8B5CF6","#0891B2","#16A34A"];
-      const pct=Math.round(e[1]/maxCause*100);
-      return`<div class="bar-row"><div class="bar-label" style="width:160px">${e[0]}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"><span class="bar-val">${e[1]}</span></div></div></div>`;
-    }).join("")}
-  </div>`;
 
   // Resolution progress summary
   const resolvedPct=Math.round(closedCount/total*100);
@@ -630,20 +679,21 @@ function bugWeeklyHTML(){
 
 function makeDonut(data,cx,cy,r){
   const total=data.reduce((s,d)=>s+d.val,0);
+  const ir=r*0.6;
   let angle=-90;
+  const gap=1.5; // degrees gap between segments
   return data.map(d=>{
     const pct=d.val/total;
-    const a1=angle*Math.PI/180;
+    const a1=(angle+gap/2)*Math.PI/180;
     angle+=pct*360;
-    const a2=angle*Math.PI/180;
+    const a2=(angle-gap/2)*Math.PI/180;
     const large=pct>0.5?1:0;
     const x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
     const x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
-    const ir=r*0.55;
     const ix1=cx+ir*Math.cos(a1),iy1=cy+ir*Math.sin(a1);
     const ix2=cx+ir*Math.cos(a2),iy2=cy+ir*Math.sin(a2);
-    return`<path d="M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large} 0 ${ix1},${iy1} Z" fill="${d.color}" opacity="0.9"/>`;
-  }).join("")+`<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="18" font-weight="800" fill="var(--text)" font-family="'JetBrains Mono',monospace">${total}</text><text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="9" fill="var(--text3)" font-weight="600">总计</text>`;
+    return`<path d="M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large} 0 ${ix1},${iy1} Z" fill="${d.color}" opacity="0.92"/>`;
+  }).join("")+`<text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="32" font-weight="800" fill="var(--text)" font-family="'JetBrains Mono',monospace">${total}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="12" fill="var(--text3)" font-weight="600">总计</text>`;
 }
 
 // ========== MODAL ==========
