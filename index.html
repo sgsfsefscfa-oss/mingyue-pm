@@ -168,6 +168,30 @@ textarea.inp{resize:vertical;min-height:56px}
 .bug-period{font-size:11px;color:var(--text3);margin-bottom:16px;padding:8px 12px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;gap:6px}
 .bug-period strong{color:var(--text2)}
 
+.rpt-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;transition:all .2s}
+.rpt-card:hover{box-shadow:var(--shadow-lg)}
+.rpt-summary{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;transition:background .15s}
+.rpt-summary:hover{background:var(--bg3)}
+.rpt-arrow{width:20px;height:20px;transition:transform .25s;flex-shrink:0;color:var(--text3)}
+.rpt-card.open .rpt-arrow{transform:rotate(180deg)}
+.rpt-week{font-size:15px;font-weight:700;white-space:nowrap}
+.rpt-period-text{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.rpt-badges{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.rpt-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.rpt-total{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue)}
+.rpt-mini-progress{width:80px;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.rpt-mini-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#16A34A,#22D3EE)}
+.rpt-body{padding:0 20px 20px;animation:fadeIn .2s}
+
+.fs-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:50;overflow-y:auto;animation:fadeIn .2s}
+.fs-header{position:sticky;top:0;z-index:51;background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.fs-title{font-size:16px;font-weight:700;flex:1}
+.fs-close{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:18px;transition:all .15s;background:var(--bg3)}
+.fs-close:hover{background:var(--bg4);color:var(--text)}
+.fs-body{max-width:1200px;margin:0 auto;padding:20px 24px 60px}
+.fs-btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--text2);display:inline-flex;align-items:center;gap:4px;transition:all .15s;flex-shrink:0}
+.fs-btn:hover{background:var(--bg4);color:var(--text)}
+
 table{width:100%;border-collapse:collapse;font-size:11px;background:var(--bg2);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
 th{padding:8px 10px;text-align:left;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;border-bottom:1px solid var(--border)}
 td{padding:8px 10px;color:var(--text2);border-bottom:1px solid var(--border)}
@@ -418,26 +442,29 @@ function addMilestone(){
 function toggleMs(id){D.milestones=D.milestones.map(m=>m.id===id?{...m,status:m.status==="done"?"todo":"done"}:m);save();toast(D.milestones.find(m=>m.id===id)?.status==="done"?"✓ 已完成":"已恢复");render();}
 function delMs(id){D.milestones=D.milestones.filter(m=>m.id!==id);save();toast("已删除");render();}
 
-// ========== BUG DATA ==========
-const BUG_DATA=[
-  {id:1,title:"26年3月保健食品/膳食营养补充食品二级类目数据缺失",status:"bug已受理，修复中",owner:"赵明月",creator:"赵明月",verifier:"",created:"2026-04-13",updated:"2026-04-13",cause:"受上次清分区影响，老供应商数据未补，店铺和品牌补数据逻辑需用叶子类目ID关联，历史数据不全导致无法匹配叶子类目，下游无数据",tempFix:"帅总直接把店铺/品牌的供应商数据表的历史分区全部补一下，次日可正常调度展示",rootFix:"页面数据整体核查",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/2e17f1b146b8b45419b646d47a"},
-  {id:2,title:"抖音淡旺季标签，客户相同筛选条件看不到淡旺季数据",status:"bug已受理，修复中",owner:"舒子达",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-07",updated:"2026-04-07",cause:"SQL卡片引用的表有误",tempFix:"修改SQL",rootFix:"修改SQL",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/5decced84dc06700b2fced8526"},
-  {id:3,title:"淘宝月更旗舰版 竞店布局分析，总店销售金额字段历史数据不一致",status:"bug已受理，修复中",owner:"赵明月",creator:"王丽杰",verifier:"王丽杰",created:"2026-04-01",updated:"2026-04-13",cause:"原供应商店铺逻辑只有上叶子类目TOP100榜的销售额，数据不全；新逻辑基于商品TOP万+求和计算，更接近全店销售额",tempFix:"做指标注释，或者删除该指标",rootFix:"需要考虑要不要展示老供应商数据",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/3d1d64f34c7110886d05f30ae3"},
-  {id:4,title:"日更榜单选两天，点击率会把两天的数据加和",status:"bug已受理，修复中",owner:"赵明月",creator:"范盈禧",verifier:"范盈禧",created:"2026-04-01",updated:"2026-04-10",cause:"点击率是直接取的原准确数据，率值类指标计算逻辑有误",tempFix:"了解竞品没烦恼的计算方案，修改成对应的计算逻辑",rootFix:"核查所有率值类指标，是否存在类似问题",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/50e865debaf25f29cb7840dc40"},
-  {id:5,title:"洗护清洁剂/卫生巾/纸/香薰关键词数据断更",status:"待确认",owner:"李柯迪",creator:"千寻",verifier:"王丽杰",created:"2026-04-09",updated:"2026-04-09",cause:"任务丢失",tempFix:"补历史任务",rootFix:"增加任务监控逻辑",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/da10a407bb1ac1c746d5437164"},
-  {id:6,title:"默认快捷筛选设置功能失效",status:"待确认",owner:"孙信宇",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-08",updated:"2026-04-13",cause:"设计如此：默认筛选会跟仪表盘跳转冲突",tempFix:"关闭默认选项",rootFix:"关闭默认选项",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/1cf7ceb54720c0349ea33f209e"},
-  {id:7,title:"抖音平台，智能家居一级类目到3月16日断更了",status:"待确认",owner:"舒子达",creator:"炙羽",verifier:"",created:"2026-04-03",updated:"2026-04-03",cause:"数据未更新完毕",tempFix:"手动限制筛选器的筛选时间范围",rootFix:"产品端/数据源端支持最新月份手动控制或者默认数据完整后才展示",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/bfe51a4672885fddb83b2efa94"},
-  {id:8,title:"营销优惠乱码（稻香村糕点礼盒装）",status:"待确认",owner:"秦加虎",creator:"赵明月",verifier:"",created:"2026-04-02",updated:"2026-04-03",cause:"三方数据结构变更，解析异常导致",tempFix:"更新数据解析逻辑",rootFix:"监测三方数据解析逻辑，有变动主动响应",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/ca9725491415a049004f5eb883"},
-  {id:9,title:"上新监控无法添加店铺和链接（班喜迪旗舰店）",status:"待确认",owner:"秦加虎",creator:"炙羽",verifier:"宋梦珍",created:"2026-04-02",updated:"2026-04-02",cause:"数据解析逻辑有BUG",tempFix:"修复BUG",rootFix:"修复BUG",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/bf3f22c4475b82550806e83ffe"},
-  {id:10,title:"淘宝月更旗舰版，商品主图不是最新是25年换掉的图片",status:"非bug，不予解决",owner:"王丽杰",creator:"千寻",verifier:"王丽杰",created:"2026-04-09",updated:"2026-04-13",cause:"属于重刷历史数据过程产生的偶发BUG，下月数据更新即可覆盖",tempFix:"跟着月数据更新刷新掉",rootFix:"数仓端：综合考虑处理日期和业务日期取最新",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/b57cc2a05948c37ad55bb5c8ad"},
-  {id:11,title:"淘宝月更旗舰版 宠物类目2月数据，访客人数与生意参谋后台不一致",status:"非bug，不予解决",owner:"王丽杰",creator:"王丽杰",verifier:"王丽杰",created:"2026-04-07",updated:"2026-04-13",cause:"流量数据不能直接把日汇总算月值，月访客数是当月全部访客数去重而非日累计",tempFix:"口径及话术沟通",rootFix:"数分：指标注释",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/11e3213a0208a4821d3b8a00a8"},
-  {id:12,title:"淘宝月更旗舰版10月数据，宠物二级类目全价狗主粮排名第一商品缺失",status:"非bug，不予解决",owner:"赵明月",creator:"千寻",verifier:"王丽杰",created:"2026-04-02",updated:"2026-04-03",cause:"10月份是供应商数据，无法做到和生意参谋一致",tempFix:"宝哥根据商品表重新计算",rootFix:"宝哥根据商品表重新计算",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/2a28dfc888769c49267fa32c57"},
-  {id:13,title:"日更标准版筛选日期与页面展示日期不一致",status:"问题已修复，待验证",owner:"宋梦珍",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-08",updated:"2026-04-13",cause:"SQL是固定日期倒推逻辑，跟区间筛选器存在理解偏差",tempFix:"改成日期单选",rootFix:"改成日期单选",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/d9c7e05849f9a550f568fe81e6"},
-  {id:14,title:"月更旗舰版近6个月趋势跳转有问题，默认鲜花类目",status:"问题已修复，待验证",owner:"宋梦珍",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-01",updated:"2026-04-01",cause:"卡片指标跳转只支持带该指标及对应维度，类目结构字段走的是指标条件不在汇总里，跳转不过去",tempFix:"把需要跳转的维度放在分类里",rootFix:"产品：指标跳转支持带上特定指标",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/9ecb21835a75267b4ec24229b7"},
-  {id:15,title:"智能家居一级类目到3月16日断更了（转需求）",status:"转为需求",owner:"舒子达",creator:"炙羽",verifier:"",created:"2026-04-03",updated:"2026-04-03",cause:"数据未更新完毕",tempFix:"手动限制筛选器的筛选时间范围",rootFix:"产品端/数据源端支持最新月份手动控制或者默认数据完整后才展示",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/68c984c552ac04b47af4b1fe33"},
-  {id:16,title:"purmeo海外旗舰店 上榜叶子类目链接销售金额大于整店金额",status:"转为需求",owner:"赵明月",creator:"千寻",verifier:"王丽杰",created:"2026-04-02",updated:"2026-04-13",cause:"保健类目属于老供应商数据，店铺总销售额只统计TOP100叶子类目的销售额",tempFix:"暂不解决",rootFix:"自主替代，目前归属到食品类目的爬坡进度",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/77808289fa08e54c865bf90a78"},
-  {id:17,title:"舒伯特海外旗舰店1月支付金额与店铺后台差异大",status:"转为需求",owner:"范盈禧",creator:"范盈禧",verifier:"范盈禧",created:"2026-04-01",updated:"2026-04-13",cause:"老供应商类目问题",tempFix:"暂不解决",rootFix:"自主替代，目前归属到食品类目的爬坡进度",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/fbeed5c7f123b8f6e0af5d1b33"},
-  {id:18,title:"标准版和旗舰版榜单数量不一样但入榜金额相同",status:"转为需求",owner:"赵明月",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-01",updated:"2026-04-13",cause:"底层数据源是一个表，榜单展示页面做了限制展示TOP500还是TOP2000",tempFix:"暂不解决",rootFix:"数仓端直接对表数据量进行限制截断",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/fbeed5c7f123b8f6e0af5d1b33"},
+// ========== BUG REPORTS ==========
+const BUG_REPORTS=[
+  {id:1,title:"第15周",period:"2026-04-01 ~ 2026-04-13",bugs:[
+    {id:1,title:"26年3月保健食品/膳食营养补充食品二级类目数据缺失",status:"bug已受理，修复中",owner:"赵明月",creator:"赵明月",verifier:"",created:"2026-04-13",updated:"2026-04-13",cause:"受上次清分区影响，老供应商数据未补，店铺和品牌补数据逻辑需用叶子类目ID关联，历史数据不全导致无法匹配叶子类目，下游无数据",tempFix:"帅总直接把店铺/品牌的供应商数据表的历史分区全部补一下，次日可正常调度展示",rootFix:"页面数据整体核查",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/2e17f1b146b8b45419b646d47a"},
+    {id:2,title:"抖音淡旺季标签，客户相同筛选条件看不到淡旺季数据",status:"bug已受理，修复中",owner:"舒子达",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-07",updated:"2026-04-07",cause:"SQL卡片引用的表有误",tempFix:"修改SQL",rootFix:"修改SQL",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/5decced84dc06700b2fced8526"},
+    {id:3,title:"淘宝月更旗舰版 竞店布局分析，总店销售金额字段历史数据不一致",status:"bug已受理，修复中",owner:"赵明月",creator:"王丽杰",verifier:"王丽杰",created:"2026-04-01",updated:"2026-04-13",cause:"原供应商店铺逻辑只有上叶子类目TOP100榜的销售额，数据不全；新逻辑基于商品TOP万+求和计算，更接近全店销售额",tempFix:"做指标注释，或者删除该指标",rootFix:"需要考虑要不要展示老供应商数据",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/3d1d64f34c7110886d05f30ae3"},
+    {id:4,title:"日更榜单选两天，点击率会把两天的数据加和",status:"bug已受理，修复中",owner:"赵明月",creator:"范盈禧",verifier:"范盈禧",created:"2026-04-01",updated:"2026-04-10",cause:"点击率是直接取的原准确数据，率值类指标计算逻辑有误",tempFix:"了解竞品没烦恼的计算方案，修改成对应的计算逻辑",rootFix:"核查所有率值类指标，是否存在类似问题",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/50e865debaf25f29cb7840dc40"},
+    {id:5,title:"洗护清洁剂/卫生巾/纸/香薰关键词数据断更",status:"待确认",owner:"李柯迪",creator:"千寻",verifier:"王丽杰",created:"2026-04-09",updated:"2026-04-09",cause:"任务丢失",tempFix:"补历史任务",rootFix:"增加任务监控逻辑",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/da10a407bb1ac1c746d5437164"},
+    {id:6,title:"默认快捷筛选设置功能失效",status:"待确认",owner:"孙信宇",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-08",updated:"2026-04-13",cause:"设计如此：默认筛选会跟仪表盘跳转冲突",tempFix:"关闭默认选项",rootFix:"关闭默认选项",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/1cf7ceb54720c0349ea33f209e"},
+    {id:7,title:"抖音平台，智能家居一级类目到3月16日断更了",status:"待确认",owner:"舒子达",creator:"炙羽",verifier:"",created:"2026-04-03",updated:"2026-04-03",cause:"数据未更新完毕",tempFix:"手动限制筛选器的筛选时间范围",rootFix:"产品端/数据源端支持最新月份手动控制或者默认数据完整后才展示",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/bfe51a4672885fddb83b2efa94"},
+    {id:8,title:"营销优惠乱码（稻香村糕点礼盒装）",status:"待确认",owner:"秦加虎",creator:"赵明月",verifier:"",created:"2026-04-02",updated:"2026-04-03",cause:"三方数据结构变更，解析异常导致",tempFix:"更新数据解析逻辑",rootFix:"监测三方数据解析逻辑，有变动主动响应",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/ca9725491415a049004f5eb883"},
+    {id:9,title:"上新监控无法添加店铺和链接（班喜迪旗舰店）",status:"待确认",owner:"秦加虎",creator:"炙羽",verifier:"宋梦珍",created:"2026-04-02",updated:"2026-04-02",cause:"数据解析逻辑有BUG",tempFix:"修复BUG",rootFix:"修复BUG",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/bf3f22c4475b82550806e83ffe"},
+    {id:10,title:"淘宝月更旗舰版，商品主图不是最新是25年换掉的图片",status:"非bug，不予解决",owner:"王丽杰",creator:"千寻",verifier:"王丽杰",created:"2026-04-09",updated:"2026-04-13",cause:"属于重刷历史数据过程产生的偶发BUG，下月数据更新即可覆盖",tempFix:"跟着月数据更新刷新掉",rootFix:"数仓端：综合考虑处理日期和业务日期取最新",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/b57cc2a05948c37ad55bb5c8ad"},
+    {id:11,title:"淘宝月更旗舰版 宠物类目2月数据，访客人数与生意参谋后台不一致",status:"非bug，不予解决",owner:"王丽杰",creator:"王丽杰",verifier:"王丽杰",created:"2026-04-07",updated:"2026-04-13",cause:"流量数据不能直接把日汇总算月值，月访客数是当月全部访客数去重而非日累计",tempFix:"口径及话术沟通",rootFix:"数分：指标注释",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/11e3213a0208a4821d3b8a00a8"},
+    {id:12,title:"淘宝月更旗舰版10月数据，宠物二级类目全价狗主粮排名第一商品缺失",status:"非bug，不予解决",owner:"赵明月",creator:"千寻",verifier:"王丽杰",created:"2026-04-02",updated:"2026-04-03",cause:"10月份是供应商数据，无法做到和生意参谋一致",tempFix:"宝哥根据商品表重新计算",rootFix:"宝哥根据商品表重新计算",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/2a28dfc888769c49267fa32c57"},
+    {id:13,title:"日更标准版筛选日期与页面展示日期不一致",status:"问题已修复，待验证",owner:"宋梦珍",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-08",updated:"2026-04-13",cause:"SQL是固定日期倒推逻辑，跟区间筛选器存在理解偏差",tempFix:"改成日期单选",rootFix:"改成日期单选",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/d9c7e05849f9a550f568fe81e6"},
+    {id:14,title:"月更旗舰版近6个月趋势跳转有问题，默认鲜花类目",status:"问题已修复，待验证",owner:"宋梦珍",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-01",updated:"2026-04-01",cause:"卡片指标跳转只支持带该指标及对应维度，类目结构字段走的是指标条件不在汇总里，跳转不过去",tempFix:"把需要跳转的维度放在分类里",rootFix:"产品：指标跳转支持带上特定指标",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/9ecb21835a75267b4ec24229b7"},
+    {id:15,title:"智能家居一级类目到3月16日断更了（转需求）",status:"转为需求",owner:"舒子达",creator:"炙羽",verifier:"",created:"2026-04-03",updated:"2026-04-03",cause:"数据未更新完毕",tempFix:"手动限制筛选器的筛选时间范围",rootFix:"产品端/数据源端支持最新月份手动控制或者默认数据完整后才展示",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/68c984c552ac04b47af4b1fe33"},
+    {id:16,title:"purmeo海外旗舰店 上榜叶子类目链接销售金额大于整店金额",status:"转为需求",owner:"赵明月",creator:"千寻",verifier:"王丽杰",created:"2026-04-02",updated:"2026-04-13",cause:"保健类目属于老供应商数据，店铺总销售额只统计TOP100叶子类目的销售额",tempFix:"暂不解决",rootFix:"自主替代，目前归属到食品类目的爬坡进度",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/77808289fa08e54c865bf90a78"},
+    {id:17,title:"舒伯特海外旗舰店1月支付金额与店铺后台差异大",status:"转为需求",owner:"范盈禧",creator:"范盈禧",verifier:"范盈禧",created:"2026-04-01",updated:"2026-04-13",cause:"老供应商类目问题",tempFix:"暂不解决",rootFix:"自主替代，目前归属到食品类目的爬坡进度",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/fbeed5c7f123b8f6e0af5d1b33"},
+    {id:18,title:"标准版和旗舰版榜单数量不一样但入榜金额相同",status:"转为需求",owner:"赵明月",creator:"宋梦珍",verifier:"宋梦珍",created:"2026-04-01",updated:"2026-04-13",cause:"底层数据源是一个表，榜单展示页面做了限制展示TOP500还是TOP2000",tempFix:"暂不解决",rootFix:"数仓端直接对表数据量进行限制截断",url:"https://devops.aliyun.com/projex/project/263ab83ebfec6437fcda2c8ce1/bug/fbeed5c7f123b8f6e0af5d1b33"},
+  ]},
+  // 未来追加更多周报，格式：{id:2, title:"第16周", period:"2026-04-14 ~ 2026-04-20", bugs:[...]}
 ];
 
 const BUG_ST={
@@ -448,7 +475,7 @@ const BUG_ST={
   "转为需求":{l:"转需求",c:"#8B5CF6",bg:"#F5F3FF",ic:"→"},
 };
 
-let bugExpanded=null;
+let bugReportExpanded=null, bugFullscreen=null, bugExpanded=null;
 
 // ========== REPORT ==========
 let rType="daily",rFmt="narrative";
@@ -485,153 +512,165 @@ function rSection(t,items,c){
 }
 
 // ========== BUG WEEKLY REPORT ==========
-function bugWeeklyHTML(){
-  const bugs=BUG_DATA;
-  const total=bugs.length;
+// Shared constants
+const STACK_ORDER=["bug已受理，修复中","待确认","问题已修复，待验证","非bug，不予解决","转为需求"];
+const STACK_COLORS={"bug已受理，修复中":"#D97706","待确认":"#6366F1","问题已修复，待验证":"#2563EB","非bug，不予解决":"#6B7280","转为需求":"#8B5CF6"};
+const STATUS_COLORS=["#D97706","#6366F1","#2563EB","#6B7280","#8B5CF6"];
+const ACTIVE_STATUSES=["bug已受理，修复中","待确认","问题已修复，待验证"];
 
-  // Status distribution
-  const statusCount={};
-  bugs.forEach(b=>{statusCount[b.status]=(statusCount[b.status]||0)+1;});
-  const statusEntries=Object.entries(statusCount).sort((a,b)=>b[1]-a[1]);
+// Helper: compute report stats
+function reportStats(bugs){
+  const total=bugs.length;
+  const sc={};bugs.forEach(b=>{sc[b.status]=(sc[b.status]||0)+1;});
+  const active=bugs.filter(b=>ACTIVE_STATUSES.includes(b.status)).length;
+  const closed=total-active;
+  const pct=total?Math.round(closed/total*100):0;
+  return{total,sc,active,closed,pct};
+}
+
+// Helper: stacked bar row
+function stackedBarRow(label,count,statusMap,maxVal,labelWidth){
+  const barPct=Math.round(count/maxVal*100);
+  const segs=STACK_ORDER.filter(s=>statusMap[s]).map(s=>{
+    const segPct=(statusMap[s]/count*100).toFixed(1);
+    const st=BUG_ST[s];
+    return`<div class="stacked-seg" style="width:${segPct}%;background:${STACK_COLORS[s]};min-width:20px" title="${st?st.l:s}: ${statusMap[s]}"><span>${statusMap[s]}</span></div>`;
+  }).join('');
+  return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+    <div style="font-size:12px;font-weight:600;color:var(--text2);width:${labelWidth||100}px;text-align:right;flex-shrink:0">${label}</div>
+    <div style="flex:1;display:flex;align-items:center;gap:8px">
+      <div style="flex:0 0 ${barPct}%;min-width:40px;height:28px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg3)">${segs}</div>
+      <span style="font-size:12px;font-weight:800;color:var(--text);font-family:'JetBrains Mono',monospace;flex-shrink:0">${count}</span>
+    </div>
+  </div>`;
+}
+
+// Main list view
+function bugWeeklyHTML(){
+  let h=`<div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap">
+    ${[{k:"daily",l:"日报"},{k:"weekly",l:"周报"},{k:"monthly",l:"月报"},{k:"bugweekly",l:"行情BUG周统计"}].map(t=>`<button class="chip ${rType===t.k?"active":""}" onclick="rType='${t.k}';renderContent()">${t.l}</button>`).join("")}
+  </div>`;
+
+  // Total across all reports
+  const allBugs=BUG_REPORTS.reduce((a,r)=>a+r.bugs.length,0);
+  h+=`<div style="font-size:11px;color:var(--text3);margin-bottom:12px">共 ${BUG_REPORTS.length} 期报告，累计 ${allBugs} 个线上问题</div>`;
+
+  // Render each report as a collapsible card
+  BUG_REPORTS.forEach(rpt=>{
+    const s=reportStats(rpt.bugs);
+    const isOpen=bugReportExpanded===rpt.id;
+    // Summary badges for collapsed state
+    const summaryBadges=STACK_ORDER.filter(st=>s.sc[st]).map(st=>{
+      const bst=BUG_ST[st];
+      return`<span class="badge" style="background:${bst.bg};color:${bst.c};font-size:9px">${bst.ic} ${bst.l} ${s.sc[st]}</span>`;
+    }).join('');
+
+    h+=`<div class="rpt-card ${isOpen?"open":""}">
+      <div class="rpt-summary" onclick="bugReportExpanded=bugReportExpanded===${rpt.id}?null:${rpt.id};bugExpanded=null;renderContent()">
+        <svg class="rpt-arrow" viewBox="0 0 20 20" fill="currentColor"><path d="M5.3 7.3a1 1 0 011.4 0L10 10.6l3.3-3.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 010-1.4z"/></svg>
+        <div style="min-width:0;flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="rpt-week">📋 ${rpt.title}</span>
+            <span class="rpt-period-text">${rpt.period}</span>
+          </div>
+          <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">${summaryBadges}</div>
+        </div>
+        <div class="rpt-right">
+          <div style="text-align:center">
+            <div class="rpt-total">${s.total}</div>
+            <div style="font-size:9px;color:var(--text3)">问题</div>
+          </div>
+          <div style="text-align:center">
+            <div class="rpt-mini-progress"><div class="rpt-mini-progress-fill" style="width:${s.pct}%"></div></div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px">处理 ${s.pct}%</div>
+          </div>
+        </div>
+      </div>
+      ${isOpen?`<div class="rpt-body">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="fs-btn" onclick="event.stopPropagation();openBugFullscreen(${rpt.id})">⛶ 全屏查看</button>
+        </div>
+        ${renderBugReportDetail(rpt)}
+      </div>`:''}
+    </div>`;
+  });
+  return h;
+}
+
+// Full detail rendering for a single report
+function renderBugReportDetail(rpt){
+  const bugs=rpt.bugs;
+  const {total,sc,active,closed,pct}=reportStats(bugs);
+  const statusEntries=Object.entries(sc).sort((a,b)=>b[1]-a[1]);
 
   // Owner distribution
-  const ownerCount={};
-  bugs.forEach(b=>{ownerCount[b.owner]=(ownerCount[b.owner]||0)+1;});
+  const ownerCount={},ownerStatusMap={};
+  bugs.forEach(b=>{
+    ownerCount[b.owner]=(ownerCount[b.owner]||0)+1;
+    if(!ownerStatusMap[b.owner])ownerStatusMap[b.owner]={};
+    ownerStatusMap[b.owner][b.status]=(ownerStatusMap[b.owner][b.status]||0)+1;
+  });
   const ownerEntries=Object.entries(ownerCount).sort((a,b)=>b[1]-a[1]);
   const maxOwner=Math.max(...ownerEntries.map(e=>e[1]));
 
   // Cause categories
-  const causeCategories={};
+  const causeCount={},causeStatusMap={};
   bugs.forEach(b=>{
-    let cat="其他";
-    const c=b.cause.toLowerCase();
+    let cat="其他";const c=b.cause.toLowerCase();
     if(c.includes("供应商")||c.includes("历史数据")||c.includes("老供应商"))cat="历史数据/供应商问题";
     else if(c.includes("sql")||c.includes("逻辑")||c.includes("bug")||c.includes("解析"))cat="代码/SQL逻辑缺陷";
     else if(c.includes("任务丢失")||c.includes("监控")||c.includes("更新"))cat="任务调度/监控缺失";
     else if(c.includes("设计")||c.includes("口径")||c.includes("结构"))cat="产品设计/口径问题";
     else if(c.includes("三方")||c.includes("数据源"))cat="三方数据变更";
-    causeCategories[cat]=(causeCategories[cat]||0)+1;
-  });
-  const causeEntries=Object.entries(causeCategories).sort((a,b)=>b[1]-a[1]);
-  const maxCause=Math.max(...causeEntries.map(e=>e[1]));
-
-  // Active (unresolved)
-  const activeStatuses=["bug已受理，修复中","待确认","问题已修复，待验证"];
-  const activeCount=bugs.filter(b=>activeStatuses.includes(b.status)).length;
-  const closedCount=total-activeCount;
-
-  // Colors for donut
-  const statusColors=["#D97706","#6366F1","#2563EB","#6B7280","#8B5CF6"];
-  const ownerColors=["#2563EB","#D97706","#16A34A","#DC2626","#8B5CF6","#C2410C","#0891B2","#4F46E5"];
-
-  let h=`<div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap">
-    ${[{k:"daily",l:"日报"},{k:"weekly",l:"周报"},{k:"monthly",l:"月报"},{k:"bugweekly",l:"行情BUG周统计"}].map(t=>`<button class="chip ${rType===t.k?"active":""}" onclick="rType='${t.k}';renderContent()">${t.l}</button>`).join("")}
-  </div>`;
-
-  // Period info
-  h+=`<div class="bug-period">📊 <strong>统计周期：2026-04-01 ~ 2026-04-13</strong>（共收录 ${total} 个线上问题）</div>`;
-
-  // Stats row
-  h+=`<div class="bug-stats-row">
-    <div class="bug-stat"><div class="bug-stat::before" style="position:absolute;top:0;left:0;right:0;height:3px;background:#2E7CF6"></div><div class="bug-stat-num" style="color:#2E7CF6">${total}</div><div class="bug-stat-label">总计</div></div>
-    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#D97706"></div><div class="bug-stat-num" style="color:#D97706">${statusCount["bug已受理，修复中"]||0}</div><div class="bug-stat-label">修复中</div></div>
-    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6366F1"></div><div class="bug-stat-num" style="color:#6366F1">${statusCount["待确认"]||0}</div><div class="bug-stat-label">待确认</div></div>
-    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#16A34A"></div><div class="bug-stat-num" style="color:#16A34A">${statusCount["问题已修复，待验证"]||0}</div><div class="bug-stat-label">待验证</div></div>
-    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6B7280"></div><div class="bug-stat-num" style="color:#6B7280">${(statusCount["非bug，不予解决"]||0)+(statusCount["转为需求"]||0)}</div><div class="bug-stat-label">已关闭/转需求</div></div>
-  </div>`;
-
-  // Status order for stacked bars
-  const stackOrder=["bug已受理，修复中","待确认","问题已修复，待验证","非bug，不予解决","转为需求"];
-  const stackColors={"bug已受理，修复中":"#D97706","待确认":"#6366F1","问题已修复，待验证":"#2563EB","非bug，不予解决":"#6B7280","转为需求":"#8B5CF6"};
-
-  // Build per-owner status breakdown
-  const ownerStatusMap={};
-  bugs.forEach(b=>{
-    if(!ownerStatusMap[b.owner])ownerStatusMap[b.owner]={};
-    ownerStatusMap[b.owner][b.status]=(ownerStatusMap[b.owner][b.status]||0)+1;
-  });
-
-  // Build per-cause status breakdown
-  const causeStatusMap={};
-  bugs.forEach(b=>{
-    let cat="其他";
-    const c=b.cause.toLowerCase();
-    if(c.includes("供应商")||c.includes("历史数据")||c.includes("老供应商"))cat="历史数据/供应商问题";
-    else if(c.includes("sql")||c.includes("逻辑")||c.includes("bug")||c.includes("解析"))cat="代码/SQL逻辑缺陷";
-    else if(c.includes("任务丢失")||c.includes("监控")||c.includes("更新"))cat="任务调度/监控缺失";
-    else if(c.includes("设计")||c.includes("口径")||c.includes("结构"))cat="产品设计/口径问题";
-    else if(c.includes("三方")||c.includes("数据源"))cat="三方数据变更";
+    causeCount[cat]=(causeCount[cat]||0)+1;
     if(!causeStatusMap[cat])causeStatusMap[cat]={};
     causeStatusMap[cat][b.status]=(causeStatusMap[cat][b.status]||0)+1;
   });
+  const causeEntries=Object.entries(causeCount).sort((a,b)=>b[1]-a[1]);
+  const maxCause=Math.max(...causeEntries.map(e=>e[1]));
 
-  // Status distribution donut — full width
+  const stackLegend=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">${STACK_ORDER.map(s=>{
+    const st=BUG_ST[s];return`<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3)"><div style="width:10px;height:10px;border-radius:2px;background:${STACK_COLORS[s]}"></div>${st?st.l:s}</div>`;
+  }).join("")}</div>`;
+
+  let h='';
+
+  // Stats row
+  h+=`<div class="bug-stats-row">
+    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#2E7CF6"></div><div class="bug-stat-num" style="color:#2E7CF6">${total}</div><div class="bug-stat-label">总计</div></div>
+    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#D97706"></div><div class="bug-stat-num" style="color:#D97706">${sc["bug已受理，修复中"]||0}</div><div class="bug-stat-label">修复中</div></div>
+    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6366F1"></div><div class="bug-stat-num" style="color:#6366F1">${sc["待确认"]||0}</div><div class="bug-stat-label">待确认</div></div>
+    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#16A34A"></div><div class="bug-stat-num" style="color:#16A34A">${sc["问题已修复，待验证"]||0}</div><div class="bug-stat-label">待验证</div></div>
+    <div class="bug-stat"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6B7280"></div><div class="bug-stat-num" style="color:#6B7280">${(sc["非bug，不予解决"]||0)+(sc["转为需求"]||0)}</div><div class="bug-stat-label">已关闭/转需求</div></div>
+  </div>`;
+
+  // Donut
   h+=`<div class="chart-section" style="margin-bottom:12px">
     <div class="chart-title">📋 BUG状态分布</div>
     <div class="donut-wrap" style="gap:40px;padding:16px 0">
-      <svg width="220" height="220" viewBox="0 0 220 220">${makeDonut(statusEntries.map((e,i)=>({val:e[1],color:statusColors[i%statusColors.length]})),110,110,70)}</svg>
+      <svg width="220" height="220" viewBox="0 0 220 220">${makeDonut(statusEntries.map((e,i)=>({val:e[1],color:STATUS_COLORS[i%STATUS_COLORS.length]})),110,110,70)}</svg>
       <div class="donut-legend" style="gap:10px">${statusEntries.map((e,i)=>{
-        const st=BUG_ST[e[0]];
-        const pct=Math.round(e[1]/total*100);
-        return`<div class="donut-legend-item" style="font-size:13px"><div class="donut-legend-dot" style="background:${statusColors[i%statusColors.length]};width:14px;height:14px;border-radius:4px"></div><span style="min-width:60px">${st?st.l:e[0]}</span><span class="donut-legend-val" style="font-size:14px">${e[1]}</span><span style="font-size:11px;color:var(--text3);min-width:40px;text-align:right">${pct}%</span></div>`;
+        const st=BUG_ST[e[0]];const p=Math.round(e[1]/total*100);
+        return`<div class="donut-legend-item" style="font-size:13px"><div class="donut-legend-dot" style="background:${STATUS_COLORS[i%STATUS_COLORS.length]};width:14px;height:14px;border-radius:4px"></div><span style="min-width:60px">${st?st.l:e[0]}</span><span class="donut-legend-val" style="font-size:14px">${e[1]}</span><span style="font-size:11px;color:var(--text3);min-width:40px;text-align:right">${p}%</span></div>`;
       }).join("")}</div>
     </div>
   </div>`;
 
-  // Stacked bar legend
-  const stackLegendHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">${stackOrder.map(s=>{
-    const st=BUG_ST[s];
-    return`<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3)"><div style="width:10px;height:10px;border-radius:2px;background:${stackColors[s]}"></div>${st?st.l:s}</div>`;
-  }).join("")}</div>`;
-
-  // Helper: build stacked bar HTML for a status map
-  function stackedBarRow(label, count, statusMap, maxVal, labelWidth){
-    const barPct=Math.round(count/maxVal*100);
-    const segs=stackOrder.filter(s=>statusMap[s]).map(s=>{
-      const segPct=(statusMap[s]/count*100).toFixed(1);
-      const st=BUG_ST[s];
-      return`<div class="stacked-seg" style="width:${segPct}%;background:${stackColors[s]};min-width:20px" title="${st?st.l:s}: ${statusMap[s]}"><span>${statusMap[s]}</span></div>`;
-    }).join('');
-    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-      <div style="font-size:12px;font-weight:600;color:var(--text2);width:${labelWidth||100}px;text-align:right;flex-shrink:0">${label}</div>
-      <div style="flex:1;display:flex;align-items:center;gap:8px">
-        <div style="flex:0 0 ${barPct}%;min-width:40px;height:28px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg3)">${segs}</div>
-        <span style="font-size:12px;font-weight:800;color:var(--text);font-family:'JetBrains Mono',monospace;flex-shrink:0">${count}</span>
-      </div>
-    </div>`;
-  }
-
   // Two-column: Owner + Cause
   h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">`;
-
-  // Owner distribution — stacked bar chart
-  h+=`<div class="chart-section">
-    <div class="chart-title">👤 责任人分布</div>
-    ${stackLegendHTML}
-    ${ownerEntries.map(e=>stackedBarRow(e[0],e[1],ownerStatusMap[e[0]]||{},maxOwner,80)).join("")}
-  </div>`;
-
-  // Cause category — stacked bar chart
-  h+=`<div class="chart-section">
-    <div class="chart-title">🔍 问题原因分类</div>
-    ${stackLegendHTML}
-    ${causeEntries.map(e=>stackedBarRow(e[0],e[1],causeStatusMap[e[0]]||{},maxCause,150)).join("")}
-  </div>`;
-
+  h+=`<div class="chart-section"><div class="chart-title">👤 责任人分布</div>${stackLegend}${ownerEntries.map(e=>stackedBarRow(e[0],e[1],ownerStatusMap[e[0]]||{},maxOwner,80)).join("")}</div>`;
+  h+=`<div class="chart-section"><div class="chart-title">🔍 问题原因分类</div>${stackLegend}${causeEntries.map(e=>stackedBarRow(e[0],e[1],causeStatusMap[e[0]]||{},maxCause,150)).join("")}</div>`;
   h+=`</div>`;
 
-  // Resolution progress summary
-  const resolvedPct=Math.round(closedCount/total*100);
+  // Progress bar
   h+=`<div class="chart-section" style="margin-bottom:16px">
     <div class="chart-title">📈 处理进度总览</div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">
       <div style="flex:1">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px"><span>待处理 ${activeCount} 个</span><span>已处理 ${closedCount} 个</span></div>
-        <div style="height:10px;background:var(--bg3);border-radius:5px;overflow:hidden">
-          <div style="height:100%;width:${resolvedPct}%;background:linear-gradient(90deg,#16A34A,#22D3EE);border-radius:5px;transition:width .5s"></div>
-        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px"><span>待处理 ${active} 个</span><span>已处理 ${closed} 个</span></div>
+        <div style="height:10px;background:var(--bg3);border-radius:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#16A34A,#22D3EE);border-radius:5px;transition:width .5s"></div></div>
       </div>
-      <div style="text-align:center"><div style="font-size:24px;font-weight:800;font-family:'JetBrains Mono',monospace;color:#16A34A">${resolvedPct}%</div><div style="font-size:9px;color:var(--text3)">处理率</div></div>
+      <div style="text-align:center"><div style="font-size:24px;font-weight:800;font-family:'JetBrains Mono',monospace;color:#16A34A">${pct}%</div><div style="font-size:9px;color:var(--text3)">处理率</div></div>
     </div>
   </div>`;
 
@@ -641,7 +680,7 @@ function bugWeeklyHTML(){
   bugs.forEach(b=>{
     const st=BUG_ST[b.status]||{l:b.status,c:"#6B7280",bg:"#F9FAFB"};
     const ex=bugExpanded===b.id;
-    h+=`<div class="bug-detail-card ${ex?"expanded":""}" style="border-left-color:${st.c}" onclick="bugExpanded=bugExpanded===${b.id}?null:${b.id};renderContent()">
+    h+=`<div class="bug-detail-card ${ex?"expanded":""}" style="border-left-color:${st.c}" onclick="event.stopPropagation();bugExpanded=bugExpanded===${b.id}?null:${b.id};renderBugView()">
       <div class="bug-detail-header">
         <div style="flex:1;min-width:0">
           <div class="bug-detail-title">${b.title}</div>
@@ -653,18 +692,9 @@ function bugWeeklyHTML(){
         </div>
       </div>
       ${ex?`<div class="bug-analysis">
-        <div class="analysis-block">
-          <div class="analysis-label">🔴 问题原因</div>
-          <div class="analysis-content cause">${b.cause}</div>
-        </div>
-        <div class="analysis-block">
-          <div class="analysis-label">🟡 临时解决方案</div>
-          <div class="analysis-content temp">${b.tempFix}</div>
-        </div>
-        <div class="analysis-block">
-          <div class="analysis-label">🟢 根本解决方案</div>
-          <div class="analysis-content root">${b.rootFix}</div>
-        </div>
+        <div class="analysis-block"><div class="analysis-label">🔴 问题原因</div><div class="analysis-content cause">${b.cause}</div></div>
+        <div class="analysis-block"><div class="analysis-label">🟡 临时解决方案</div><div class="analysis-content temp">${b.tempFix}</div></div>
+        <div class="analysis-block"><div class="analysis-label">🟢 根本解决方案</div><div class="analysis-content root">${b.rootFix}</div></div>
         <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
           ${b.verifier?`<span style="font-size:10px;color:var(--text3)">验证人：<strong style="color:var(--text2)">${b.verifier}</strong></span>`:""}
           <span style="font-size:10px;color:var(--text3)">更新：${b.updated}</span>
@@ -676,6 +706,39 @@ function bugWeeklyHTML(){
   h+=`</div>`;
   return h;
 }
+
+// Re-render just the bug view (for card expand without full page re-render)
+function renderBugView(){
+  if(bugFullscreen!==null){
+    const rpt=BUG_REPORTS.find(r=>r.id===bugFullscreen);
+    if(rpt)document.getElementById('fs-body').innerHTML=renderBugReportDetail(rpt);
+  } else {
+    renderContent();
+  }
+}
+
+// Fullscreen mode
+function openBugFullscreen(id){
+  bugFullscreen=id;
+  const rpt=BUG_REPORTS.find(r=>r.id===id);if(!rpt)return;
+  document.getElementById("modal-slot").innerHTML=`<div class="fs-overlay">
+    <div class="fs-header">
+      <button class="fs-close" onclick="closeBugFullscreen()">✕</button>
+      <div class="fs-title">📋 ${rpt.title} · ${rpt.period}</div>
+    </div>
+    <div class="fs-body" id="fs-body">${renderBugReportDetail(rpt)}</div>
+  </div>`;
+}
+
+function closeBugFullscreen(){
+  bugFullscreen=null;
+  document.getElementById("modal-slot").innerHTML="";
+}
+
+// ESC to close fullscreen
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&bugFullscreen!==null)closeBugFullscreen();
+});
 
 function makeDonut(data,cx,cy,r){
   const total=data.reduce((s,d)=>s+d.val,0);
