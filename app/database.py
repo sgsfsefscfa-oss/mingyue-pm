@@ -1,8 +1,10 @@
 import os
+from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DB_PATH = os.getenv("DB_PATH", "data/mingyue.db")
+_PROJECT_ROOT = Path(__file__).parent.parent
+DB_PATH = os.getenv("DB_PATH", str(_PROJECT_ROOT / "data" / "mingyue.db"))
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -14,5 +16,8 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
