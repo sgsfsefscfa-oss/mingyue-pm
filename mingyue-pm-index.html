@@ -204,23 +204,34 @@ function sCfgSave(){try{localStorage.setItem(SSK,JSON.stringify(sCfg))}catch(e){
 // ========== INIT ==========
 D=load()||JSON.parse(JSON.stringify(DEFAULT));
 
-// ========== 钉钉日历同步（本周 2026-04-14 ~ 04-20）==========
+// ========== 钉钉日历同步（本周 2026-04-14 ~ 04-20，仅已接受日程）==========
 (function seedCalendar(){
-  const cal=[
-    {title:"大有泰评价&商详",project:"agent",status:"todo",priority:"P2",date:"2026-04-14",notes:"📅 会议 10:00–12:00｜与星辰参与",cat:"task"},
-    {title:"【可莎蜜儿】跑通AI推广场景",project:"agent",status:"todo",priority:"P1",date:"2026-04-14",notes:"📅 会议 14:30–15:30",cat:"task"},
-    {title:"Agent实习生面试 · 董泽瑞",project:"agent",status:"todo",priority:"P2",date:"2026-04-14",notes:"📅 面试 16:00–17:00｜陈璐组织",cat:"task"},
-    {title:"Agent实习生面试 · 罗文婕",project:"agent",status:"todo",priority:"P2",date:"2026-04-14",notes:"📅 面试 17:00–18:00｜陈璐组织",cat:"task"},
-    {title:"【行情】内部周会",project:"hangqing",status:"todo",priority:"P2",date:"2026-04-15",notes:"📅 周会 09:30–10:00",cat:"task"},
-    {title:"插件评审",project:"agent",status:"todo",priority:"P1",date:"2026-04-15",notes:"📅 会议 14:00–16:00｜参与人：玉宝、秦加虎",cat:"task"},
-    {title:"智能体进展同步会",project:"agent",status:"todo",priority:"P1",date:"2026-04-15",notes:"📅 会议 19:00–21:00｜萧克组织，多团队参与",cat:"task"},
-    {title:"提供ISV退费明细表给罗凡林",project:"other",status:"todo",priority:"P1",date:"2026-04-19",notes:"📅 截止4月24日｜会议节点 4/19 11:00–12:00，杨颂组织",cat:"task"},
-    {title:"行情高手 · 标准化迭代周会",project:"hangqing",status:"todo",priority:"P2",date:"2026-04-20",notes:"📅 周会 19:00–20:00｜李润欣组织",cat:"task"},
+  // 清理上次误同步的已拒绝日程
+  var before=D.tasks.length;
+  D.tasks=D.tasks.filter(function(t){return t.title!=="提供ISV退费明细表给罗凡林";});
+  var cleaned=D.tasks.length<before;
+
+  // endTs = 会议结束时间戳(ms, CST)，用于判断是否已完成
+  var cal=[
+    {title:"大有泰评价&商详",       project:"agent",   priority:"P2",date:"2026-04-14",notes:"📅 会议 10:00–12:00｜与星辰参与",          cat:"task",endTs:1776139200000},
+    {title:"【可莎蜜儿】跑通AI推广场景",project:"agent", priority:"P1",date:"2026-04-14",notes:"📅 会议 14:30–15:30",                       cat:"task",endTs:1776151800000},
+    {title:"Agent实习生面试 · 董泽瑞",project:"agent",  priority:"P2",date:"2026-04-14",notes:"📅 面试 16:00–17:00｜陈璐组织",             cat:"task",endTs:1776157200000},
+    {title:"Agent实习生面试 · 罗文婕",project:"agent",  priority:"P2",date:"2026-04-14",notes:"📅 面试 17:00–18:00｜陈璐组织",             cat:"task",endTs:1776160800000},
+    {title:"【行情】内部周会",         project:"hangqing",priority:"P2",date:"2026-04-15",notes:"📅 周会 09:30–10:00",                       cat:"task",endTs:1776218400000},
+    {title:"插件评审",                project:"agent",  priority:"P1",date:"2026-04-15",notes:"📅 会议 14:00–16:00｜参与人：玉宝、秦加虎", cat:"task",endTs:1776240000000},
+    {title:"智能体进展同步会",         project:"agent",  priority:"P1",date:"2026-04-15",notes:"📅 会议 19:00–21:00｜萧克组织，多团队参与", cat:"task",endTs:1776258000000},
+    {title:"行情高手 · 标准化迭代周会",project:"hangqing",priority:"P2",date:"2026-04-20",notes:"📅 周会 19:00–20:00｜李润欣组织",          cat:"task",endTs:1776686400000},
   ];
-  let changed=false;
+  var now=Date.now();
+  var changed=cleaned;
   cal.forEach(function(ct){
-    if(!D.tasks.some(function(t){return t.title===ct.title&&t.date===ct.date;})){
+    var ex=D.tasks.find(function(t){return t.title===ct.title&&t.date===ct.date;});
+    if(ex){
+      // 若用户未手动改过状态（仍是 todo），且会议已结束，则自动标为完成
+      if(ex.status==="todo"&&now>ct.endTs){ex.status="done";changed=true;}
+    }else{
       ct.id=Date.now()+Math.random();
+      ct.status=now>ct.endTs?"done":"todo";
       D.tasks.push(ct);
       changed=true;
     }
