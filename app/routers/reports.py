@@ -51,8 +51,7 @@ def _proj_map(db) -> dict:
 def daily_report(request: Request, db: Session = Depends(get_db)):
     today = date.today().isoformat()
     pm = _proj_map(db)
-    return templates.TemplateResponse("report_full.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "report_full.html", {
         "title": f"日报 · {today}",
         "period": "daily",
         "date_label": today,
@@ -66,8 +65,7 @@ def daily_report(request: Request, db: Session = Depends(get_db)):
 def weekly_report(request: Request, db: Session = Depends(get_db)):
     start, end = _week_range()
     pm = _proj_map(db)
-    return templates.TemplateResponse("report_full.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "report_full.html", {
         "title": f"周报 · {start} ~ {end}",
         "period": "weekly",
         "date_label": f"{start} ~ {end}",
@@ -81,8 +79,7 @@ def weekly_report(request: Request, db: Session = Depends(get_db)):
 def monthly_report(request: Request, db: Session = Depends(get_db)):
     start, end = _month_range()
     pm = _proj_map(db)
-    return templates.TemplateResponse("report_full.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "report_full.html", {
         "title": f"月报 · {start[:7]}",
         "period": "monthly",
         "date_label": start[:7],
