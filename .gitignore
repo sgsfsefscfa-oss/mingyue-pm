@@ -5,3 +5,5 @@ __pycache__/
 .pytest_cache/
 test.db
 .venv/
+.claude/
+sync-config.json
