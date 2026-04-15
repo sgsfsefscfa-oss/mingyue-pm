@@ -206,10 +206,9 @@ D=load()||JSON.parse(JSON.stringify(DEFAULT));
 
 // ========== 钉钉日历同步（本周 2026-04-13 ~ 04-19，仅已接受日程）==========
 (function seedCalendar(){
-  // 清理上次标题不一致的旧条目
   var before=D.tasks.length;
   D.tasks=D.tasks.filter(function(t){
-    return !["【可莎蜜儿】跑通AI推广场景","Agent实习生面试 · 董泽瑞","Agent实习生面试 · 罗文婕","行情高手 · 标准化迭代周会"].includes(t.title);
+    return ![].includes(t.title);
   });
   var cleaned=D.tasks.length<before;
 
@@ -222,7 +221,9 @@ D=load()||JSON.parse(JSON.stringify(DEFAULT));
     {title:"Agent实习生面试-董泽瑞",         project:"agent",   priority:"P2",date:"2026-04-14",notes:"📅 16:00–17:00｜陈璐",   cat:"task",endTs:1776157200000},
     {title:"Agent实习生面试-罗文婕",         project:"agent",   priority:"P2",date:"2026-04-14",notes:"📅 17:00–18:00｜陈璐",   cat:"task",endTs:1776160800000},
     {title:"【行情】内部周会",               project:"hangqing",priority:"P2",date:"2026-04-15",notes:"📅 09:30–10:00｜赵明月", cat:"task",endTs:1776218400000},
+    {title:"修改当时市场skill的描述并同步",   project:"other",   priority:"P2",date:"2026-04-15",notes:"📅 11:30–12:30｜赵明月", cat:"task",endTs:1776227400000},
     {title:"插件评审",                      project:"agent",   priority:"P2",date:"2026-04-15",notes:"📅 14:00–16:00｜赵明月", cat:"task",endTs:1776240000000},
+    {title:"【预策X森创】AGENT提示词沟通",   project:"agent",   priority:"P2",date:"2026-04-15",notes:"📅 16:00–17:00｜阿豪",   cat:"task",endTs:1776243600000},
     {title:"智能体进展同步会",               project:"agent",   priority:"P2",date:"2026-04-15",notes:"📅 19:00–21:00｜萧克",   cat:"task",endTs:1776258000000},
   ];
   var now=Date.now();
