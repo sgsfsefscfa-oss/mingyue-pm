@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data        # SQLite 数据库持久化
+      - ./.env:/app/.env:ro     # 环境变量只读挂载（可选）
+    env_file:
+      - .env
+    restart: unless-stopped
