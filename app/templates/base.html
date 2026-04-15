@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>明月的工作台 · 预策</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="//at.alicdn.com/t/c/font_5158555_dfm7au5vk0t.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.ifc{width:1em;height:1em;vertical-align:-0.15em;fill:currentColor;overflow:hidden}
+:root{
+  --bg:#F7F8FA;--bg2:#FFFFFF;--bg3:#F0F2F5;--bg4:#E8ECF0;
+  --border:#E2E6EA;--text:#1A1D21;--text2:#5F6B7A;--text3:#8B95A3;
+  --blue:#2E7CF6;--green:#16A34A;--red:#DC2626;--yellow:#D97706;
+  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow-lg:0 4px 12px rgba(0,0,0,.1);
+}
+body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:inherit;outline:none}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px}
+
+/* Header */
+.header{background:var(--bg2);padding:16px 24px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center}
+.header-sub{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:4px;font-family:'JetBrains Mono',monospace}
+.header-title{font-size:22px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+.header-date{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* Nav */
+.nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;padding:0 32px}
+.nav-btn{flex:1;max-width:120px;padding:12px 2px 10px;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);border-bottom:2px solid transparent;font-weight:500;transition:all .15s;font-size:11px}
+.nav-btn:hover{color:var(--text2)}
+.nav-btn.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+.nav-btn svg{width:22px;height:22px}
+
+/* Chips */
+.chip{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;background:var(--bg4);color:var(--text3);white-space:nowrap;transition:all .15s;cursor:pointer;border:none}
+.chip:hover{opacity:.85}
+.chip.active{background:var(--blue);color:#fff}
+
+/* Badges */
+.badge{padding:3px 8px;border-radius:8px;font-size:10px;font-weight:600;white-space:nowrap;display:inline-block}
+
+/* Buttons */
+.pri-btn{padding:9px 20px;background:var(--blue);color:#fff;border-radius:10px;font-weight:700;font-size:13px}
+.sec-btn{padding:9px 20px;background:var(--bg4);color:var(--text2);border-radius:10px;font-weight:600;font-size:13px}
+.act-btn{padding:5px 12px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg4);color:var(--text3)}
+
+/* Inputs */
+.inp{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg2);color:var(--text)}
+.inp:focus{border-color:var(--blue)}
+select.inp{-webkit-appearance:none;background:var(--bg2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%238B95A3' d='M5 7L1 3h8z'/%3E%3C/svg%3E") no-repeat right 10px center;padding-right:28px}
+textarea.inp{resize:vertical;min-height:60px}
+
+/* Modal */
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--bg2);border-radius:16px 16px 0 0;padding:20px 20px 32px;width:100%;max-width:540px;animation:slideUp .25s ease}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:14px}
+.form-row{display:flex;gap:8px;margin-top:8px}
+.form-row>*{flex:1}
+
+/* FAB */
+.fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;font-size:24px;box-shadow:0 4px 16px rgba(46,124,246,.35);z-index:20;display:flex;align-items:center;justify-content:center}
+
+/* Toast */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:8px 20px;border-radius:20px;font-size:12px;font-weight:700;z-index:40;animation:fadeIn .2s}
+
+/* Layout */
+.content{max-width:100%;padding:4px 24px 100px}
+.section-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px}
+.empty{text-align:center;padding:40px;color:var(--text3);font-size:12px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+
+{% block extra_styles %}{% endblock %}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-sub">YUCE · PROJECT HUB</div>
+    <div class="header-title">明月的工作台</div>
+    <div class="header-date" id="hdr-date"></div>
+  </div>
+</div>
+
+{% block nav %}{% endblock %}
+
+{% block content %}{% endblock %}
+
+<div id="modal-slot"></div>
+<div id="toast-slot"></div>
+
+<script>
+document.getElementById("hdr-date").textContent = new Date().toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+function ifc(name, size){ return `<svg class="ifc" style="width:${size||22}px;height:${size||22}px"><use xlink:href="#icon-${name}"></use></svg>`; }
+function toast(msg){ const s=document.getElementById("toast-slot"); s.innerHTML=`<div class="toast">${msg}</div>`; setTimeout(()=>s.innerHTML="",1800); }
+function closeModal(){ document.getElementById("modal-slot").innerHTML=""; }
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block extra_styles %}
+/* ── Filter bar ── */
+.filter-bar{padding:10px 24px;display:flex;flex-direction:column;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filter-label{font-size:10px;font-weight:600;color:var(--text3);width:40px;flex-shrink:0}
+.view-toggle{display:flex;gap:4px;margin-left:auto}
+.view-btn{padding:5px 14px;border-radius:8px;font-size:11px;font-weight:600;background:var(--bg4);color:var(--text3);border:none;cursor:pointer}
+.view-btn.active{background:var(--blue);color:#fff}
+
+/* ── Task Toolbar ── */
+.task-toolbar{display:flex;align-items:center;gap:8px;padding:10px 24px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.toolbar-views{display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:3px}
+.toolbar-view-btn{padding:5px 14px;border-radius:6px;font-size:11px;font-weight:600;color:var(--text3);border:none;cursor:pointer;background:none;transition:all .15s}
+.toolbar-view-btn.active{background:var(--bg2);color:var(--text);box-shadow:var(--shadow)}
+.toolbar-divider{width:1px;height:20px;background:var(--border)}
+.toolbar-new-btn{margin-left:auto;padding:6px 14px;background:var(--blue);color:#fff;border-radius:8px;font-size:12px;font-weight:700}
+
+/* ── Kanban ── */
+.kanban{display:flex;gap:12px;padding:16px 24px;align-items:start;overflow-x:auto;min-height:calc(100vh - 200px)}
+.kb-col{background:var(--bg3);border-radius:12px;padding:10px;min-width:260px;width:260px;min-height:120px;flex-shrink:0}
+@media(max-width:768px){.kanban{flex-direction:column}.kb-col{width:100%;min-width:0}}
+.kb-col-header{font-size:11px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.kb-status-pill{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.kb-col-count{font-size:10px;color:var(--text3);margin-left:auto}
+.kb-card{background:var(--bg2);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid var(--border);cursor:grab;box-shadow:var(--shadow);transition:box-shadow .15s,transform .1s;user-select:none}
+.kb-card:hover{box-shadow:var(--shadow-lg)}
+.kb-card:active{cursor:grabbing;transform:scale(0.98)}
+.kb-card-id{font-size:9px;font-weight:600;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+.kb-card-title{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.4;color:var(--text)}
+.kb-card-title.done{color:var(--text3);text-decoration:line-through}
+.kb-card-desc{font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.kb-card-footer{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.kb-col.drag-target{background:color-mix(in srgb,var(--blue) 8%,var(--bg3));outline:2px dashed var(--blue);outline-offset:-2px}
+
+/* ── Report Cards ── */
+.report-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:20px 24px}
+@media(max-width:600px){.report-cards{grid-template-columns:1fr}}
+.report-card-item{background:var(--bg2);border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);cursor:pointer;transition:box-shadow .15s}
+.report-card-item:hover{box-shadow:var(--shadow-lg)}
+.rc-type{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:2px;margin-bottom:6px}
+.rc-title{font-size:17px;font-weight:800;margin-bottom:12px}
+.rc-stats{display:flex;gap:12px;flex-wrap:wrap}
+.rc-stat{text-align:center}
+.rc-stat-num{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.rc-stat-label{font-size:9px;color:var(--text3);margin-top:2px;font-weight:600}
+.rc-open{font-size:11px;color:var(--blue);font-weight:600;margin-top:14px}
+{% endblock %}
+
+{% block nav %}
+<div class="nav" id="nav-bar">
+  <button class="nav-btn active" id="nav-tasks" onclick="switchTab('tasks')">
+    <svg class="ifc" style="width:22px;height:22px"><use xlink:href="#icon-qingdan"></use></svg>
+    <span>任务</span>
+  </button>
+  <button class="nav-btn" id="nav-report" onclick="switchTab('report')">
+    <svg class="ifc" style="width:22px;height:22px"><use xlink:href="#icon-tubiao"></use></svg>
+    <span>日报</span>
+  </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Tasks Tab -->
+<div id="tab-tasks">
+  <!-- Toolbar（视图切换 + 新建） -->
+  <div class="task-toolbar">
+    <div class="toolbar-views">
+      <button class="toolbar-view-btn active" id="btn-kanban" onclick="setView('kanban')">看板</button>
+      <button class="toolbar-view-btn" id="btn-table" onclick="setView('table')">表格</button>
+      <button class="toolbar-view-btn" id="btn-gantt" onclick="setView('gantt')">甘特</button>
+    </div>
+    <div class="toolbar-divider"></div>
+    <!-- 筛选控件 -->
+    <div id="project-chips" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+    <select id="f-status" class="chip" onchange="loadTasks()">
+      <option value="">全部状态</option>
+      <option value="pending">未开始</option>
+      <option value="running">进行中</option>
+      <option value="blocked">阻塞中</option>
+      <option value="completed">已完成</option>
+    </select>
+    <select id="f-priority" class="chip" onchange="loadTasks()">
+      <option value="">全部优先级</option>
+      <option value="0">P0</option>
+      <option value="1">P1</option>
+      <option value="2">P2</option>
+      <option value="3">P3</option>
+    </select>
+    <input type="date" id="f-date-from" class="chip" onchange="loadTasks()" title="截止日期起">
+    <input type="date" id="f-date-to" class="chip" onchange="loadTasks()" title="截止日期至">
+    <button class="toolbar-new-btn" onclick="openAddModal()">+ 新建任务</button>
+  </div>
+  <div id="task-view"></div>
+</div>
+
+<!-- Report Tab -->
+<div id="tab-report" style="display:none">
+  <div class="report-cards" id="report-cards"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/app.js"></script>
+<script src="/static/table.js"></script>
+<script src="/static/gantt.js"></script>
+{% endblock %}
