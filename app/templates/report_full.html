@@ -1,8 +1,107 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><title>{{ title }}</title></head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>{{ title }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F8FA;--bg2:#fff;--border:#E2E6EA;
+  --text:#1A1D21;--text2:#5F6B7A;--text3:#8B95A3;
+  --blue:#2E7CF6;--green:#16A34A;--red:#DC2626;--yellow:#D97706;
+}
+body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:var(--bg);color:var(--text);
+     font-size:clamp(13px,2vw,16px);line-height:1.7;padding:clamp(16px,4vw,48px)}
+.report-wrap{max-width:860px;margin:0 auto;background:var(--bg2);border-radius:16px;padding:clamp(20px,5vw,48px);box-shadow:0 2px 16px rgba(0,0,0,.08)}
+.report-header{border-bottom:2px solid var(--border);padding-bottom:16px;margin-bottom:24px}
+.report-type{font-size:clamp(9px,1.5vw,11px);font-weight:700;letter-spacing:4px;color:var(--text3);margin-bottom:6px}
+.report-title{font-size:clamp(20px,4vw,28px);font-weight:800;letter-spacing:-.5px}
+.report-date{font-size:clamp(11px,2vw,13px);color:var(--text3);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,2vw,16px);margin-bottom:clamp(16px,3vw,28px)}
+@media(max-width:480px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-box{background:var(--bg);border-radius:12px;padding:clamp(12px,2vw,20px);text-align:center}
+.stat-num{font-size:clamp(24px,5vw,36px);font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat-lbl{font-size:clamp(10px,1.5vw,12px);color:var(--text3);margin-top:4px;font-weight:600}
+.section{margin-bottom:clamp(16px,3vw,28px)}
+.section-hd{font-size:clamp(12px,2vw,14px);font-weight:700;color:var(--text2);margin-bottom:clamp(8px,1.5vw,12px);
+            display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.task-item{display:flex;gap:clamp(8px,1.5vw,12px);align-items:flex-start;
+           padding:clamp(8px,1.5vw,12px) 0;border-bottom:1px solid var(--border)}
+.task-item:last-child{border-bottom:none}
+.task-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.task-body{flex:1;min-width:0}
+.task-title{font-size:clamp(12px,2vw,14px);font-weight:600;line-height:1.4}
+.task-title.done{color:var(--text3);text-decoration:line-through}
+.task-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.badge{padding:2px 8px;border-radius:6px;font-size:clamp(9px,1.2vw,10px);font-weight:600}
+.task-notes{font-size:clamp(11px,1.5vw,12px);color:var(--text3);margin-top:4px;line-height:1.6}
+.empty-section{color:var(--text3);font-size:clamp(11px,1.5vw,12px);padding:8px 0}
+.print-hint{text-align:center;margin-top:clamp(16px,3vw,28px);font-size:clamp(10px,1.5vw,12px);color:var(--text3)}
+@media print{.print-hint{display:none}body{padding:0}
+.report-wrap{box-shadow:none;border-radius:0}}
+</style>
+</head>
 <body>
-<h1>{{ title }}</h1>
-<p>完成：{{ data.completed|length }} / 进行中：{{ data.running|length }} / 阻塞：{{ data.blocked|length }} / 未开始：{{ data.pending|length }}</p>
+<div class="report-wrap">
+  <div class="report-header">
+    <div class="report-type">{{ {"daily":"日报","weekly":"周报","monthly":"月报"}[period] }}</div>
+    <div class="report-title">{{ title }}</div>
+    <div class="report-date">{{ date_label }}</div>
+  </div>
+
+  <!-- 统计 -->
+  <div class="stats-row">
+    {% set stats = [
+      ("已完成", data.completed|length, "#16A34A"),
+      ("进行中", data.running|length,   "#2563EB"),
+      ("阻塞中", data.blocked|length,   "#DC2626"),
+      ("未开始", data.pending|length,   "#64748B"),
+    ] %}
+    {% for lbl, num, color in stats %}
+    <div class="stat-box">
+      <div class="stat-num" style="color:{{ color }}">{{ num }}</div>
+      <div class="stat-lbl">{{ lbl }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 各状态分组 -->
+  {% set sections = [
+    ("已完成", data.completed, "#16A34A"),
+    ("进行中", data.running,   "#2563EB"),
+    ("阻塞中 ⚠", data.blocked, "#DC2626"),
+    ("未开始", data.pending,   "#64748B"),
+  ] %}
+  {# proj_map 由 router 传入，格式为 {project_id: Project}，Jinja2 不支持 dict 原地修改 #}
+
+  {% for section_label, items, color in sections %}
+  <div class="section">
+    <div class="section-hd" style="color:{{ color }}">{{ section_label }}（{{ items|length }} 项）</div>
+    {% if items %}
+      {% for t in items %}
+      {% set proj = proj_map.get(t.project) %}
+      <div class="task-item">
+        <div class="task-dot" style="background:{{ color }}"></div>
+        <div class="task-body">
+          <div class="task-title {{ 'done' if t.status == 'completed' else '' }}">{{ t.title }}</div>
+          <div class="task-meta">
+            {% if proj %}<span class="badge" style="background:{{ proj.color }}20;color:{{ proj.color }}">{{ proj.short or proj.name }}</span>{% endif %}
+            <span class="badge" style="background:#F1F5F9;color:#64748B">P{{ t.priority }}</span>
+            {% if t.due_date %}<span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace">{{ t.due_date }}</span>{% endif %}
+          </div>
+          {% if t.notes %}<div class="task-notes">{{ t.notes }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-section">暂无</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="print-hint">Cmd/Ctrl + P 可打印或保存为 PDF</div>
+</div>
 </body>
 </html>
